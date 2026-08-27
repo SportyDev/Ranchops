@@ -1,0 +1,57 @@
+services:
+  app:
+    image: bitnami/laravel:latest
+    container_name: ranchops_app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./:/app
+    environment:
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=ranchops
+      - DB_USERNAME=root
+      - DB_PASSWORD=Ranchops2040
+    depends_on:
+      - db
+    command: php artisan serve --host=0.0.0.0 --port=8000
+
+  db:
+    image: mysql:8.0
+    container_name: ranchops_db
+    restart: unless-stopped
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: ranchops
+      MYSQL_ROOT_PASSWORD: Ranchops2040
+    volumes:
+      - ranchops_mysql_data:/var/lib/mysql
+
+  node:
+    image: node:20
+    container_name: ranchops_vite
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./:/app
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0" 
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: ranchops_phpmyadmin
+    restart: always
+    ports:
+      - "8082:80"
+    environment:
+      - PMA_HOST=db
+      - PMA_USER=root
+      - PMA_PASSWORD=Ranchops2040
+    depends_on:
+      - db
+
+volumes:
+  ranchops_mysql_data:
